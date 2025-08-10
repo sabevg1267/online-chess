@@ -224,13 +224,18 @@ io.on('connection', (socket) => {
         return;
       }
 
+      // Build unambiguous notation from from/to if provided (frontend sends SAN-like notation)
+      const builtNotation = (data && data.from && data.to)
+        ? `${data.from}-${data.to}`
+        : data.notation;
+
       // Validate the move
-      const moveResult = game.validator.makeMove(data.notation);
+      const moveResult = game.validator.makeMove(builtNotation);
       
       if (!moveResult.valid) {
         socket.emit('invalid_move', { 
           reason: moveResult.reason,
-          notation: data.notation 
+          notation: builtNotation 
         });
         console.log(`[invalid_move] ${socket.id} reason=${moveResult.reason}`);
         return;
@@ -238,11 +243,12 @@ io.on('connection', (socket) => {
 
       // Broadcast valid move to all players in the room
       io.to(roomName).emit('move', {
-        notation: data.notation,
+        notation: data.notation || builtNotation,
         from: data.from,
         to: data.to,
         piece: data.piece,
         captured: data.captured,
+        check: data.check,
         gameState: game.validator.getGameState()
       });
 
