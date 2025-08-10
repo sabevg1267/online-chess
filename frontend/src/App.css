@@ -1,0 +1,88 @@
+.App{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgb(21, 19, 43);
+}
+
+.bar{
+  width: 250px;
+  height: 400px;
+  background-color: rgb(26, 24, 37);
+  margin-left: 80px;
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.signTitle{
+  width: 100%;
+  font-size: 20px;
+  text-align: center;
+}
+
+.logoutButton{
+  background-color: red;
+  border: 0px ;
+  border-radius: 10px;
+  width: 80px;
+  height: 20px;
+}
+
+.welcome{
+  font-size: 2vh;
+  height: 10px;
+}
+
+.playRandom{
+  background-color: rgb(122, 230, 123);
+  width: 140px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: large;
+  margin-bottom: 5px;
+  margin-top: 40px;
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.playFriend{
+  background-color: rgb(122, 133, 230);
+  width: 140px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: large;
+  margin-bottom: 20px;
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.displayElo{
+  color: rgb(242, 255, 128);
+  font-style: italic;
+  height: 10px;
+}
+
+.displayWs{
+  font-style: italic;
+  height: 10px;
+}
+
+.backButton{
+  background-color: rgb(255, 100, 100);
+  margin-top: 15px;
+  border-radius: 5px;
+}
+
+.joinRoom{
+  margin-top: 5px;
+  border-radius: 5px;
+}
+
+.createRoom{
+  border-radius: 5px;
+}

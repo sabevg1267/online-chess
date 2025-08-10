@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="frontGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0FFF4"/>
+      <stop offset="100%" stop-color="#D7FBE8"/>
+    </linearGradient>
+    <linearGradient id="backGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EEF6FF"/>
+      <stop offset="100%" stop-color="#DCEBFF"/>
+    </linearGradient>
+    <linearGradient id="dbGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF7E6"/>
+      <stop offset="100%" stop-color="#FFE6BF"/>
+    </linearGradient>
+    <marker id="arrG" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#1B5E20"/>
+    </marker>
+    <marker id="arrB" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#0D47A1"/>
+    </marker>
+    <marker id="arrO" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#E65100"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="40" y="60" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#102027">Online Chess — Architecture</text>
+  <text x="40" y="86" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#37474F">Client-side chess logic in React, realtime over Socket.io, player stats in Supabase</text>
+
+  <!-- Frontend cluster -->
+  <rect x="40" y="120" width="760" height="380" rx="18" fill="url(#frontGrad)" stroke="#67C587" stroke-width="2"/>
+  <text x="60" y="150" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#1B5E20">Frontend (React)</text>
+
+  <!-- Frontend nodes -->
+  <rect x="60" y="170" width="170" height="66" rx="12" fill="#FFFFFF" stroke="#CDEFD9"/>
+  <text x="80" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">
+    App.js
+  </text>
+
+  <rect x="60" y="254" width="170" height="66" rx="12" fill="#FFFFFF" stroke="#CDEFD9"/>
+  <text x="80" y="289" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">
+    ui/Board.js
+  </text>
+
+  <rect x="60" y="338" width="170" height="66" rx="12" fill="#FFFFFF" stroke="#CDEFD9"/>
+  <text x="80" y="373" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">
+    ui/Bar.js
+  </text>
+
+  <rect x="250" y="254" width="300" height="150" rx="12" fill="#FFFFFF" stroke="#CDEFD9"/>
+  <text x="270" y="280" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">functions</text>
+  <text x="270" y="300" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#37474F">setUp, dropPiece, legalMoves, move, check, notation...</text>
+
+  <rect x="250" y="170" width="340" height="66" rx="12" fill="#FFFFFF" stroke="#CDEFD9"/>
+  <text x="270" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">socket.io-client (http://localhost:3001)</text>
+
+  <rect x="570" y="254" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#CDEFD9"/>
+  <text x="590" y="289" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">Supabase client (.env)</text>
+
+  <rect x="570" y="338" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#CDEFD9"/>
+  <text x="590" y="373" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">Google OAuth</text>
+  <text x="590" y="390" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#37474F">@react-oauth/google</text>
+
+  <!-- Frontend flows -->
+  <path d="M145,236 C145,246 145,248 250,248" fill="none" stroke="#2E7D32" stroke-width="2.5" marker-end="url(#arrG)"/>
+  <path d="M145,320 C145,330 145,332 250,332" fill="none" stroke="#2E7D32" stroke-width="2.5" marker-end="url(#arrG)"/>
+  <path d="M390,236 C390,246 390,248 390,254" fill="none" stroke="#2E7D32" stroke-width="2.5" marker-end="url(#arrG)"/>
+  <path d="M145,320 C190,320 230,212 250,212" fill="none" stroke="#2E7D32" stroke-width="2.5" marker-end="url(#arrG)"/>
+  <path d="M145,360 C230,360 540,240 590,240" fill="none" stroke="#2E7D32" stroke-width="2.5" marker-end="url(#arrG)"/>
+  <path d="M660,376 C590,376 220,376 145,376" fill="none" stroke="#2E7D32" stroke-width="2.5" marker-end="url(#arrG)"/>
+
+  <!-- Backend cluster -->
+  <rect x="820" y="120" width="520" height="300" rx="18" fill="url(#backGrad)" stroke="#5AA0F0" stroke-width="2"/>
+  <text x="840" y="150" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#0D47A1">Backend (Node + Express + Socket.io)</text>
+
+  <rect x="840" y="170" width="280" height="66" rx="12" fill="#FFFFFF" stroke="#CFE3FF"/>
+  <text x="860" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">Express HTTP + CORS</text>
+  <text x="860" y="222" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#37474F">allow http://localhost:3000</text>
+
+  <rect x="840" y="254" width="280" height="66" rx="12" fill="#FFFFFF" stroke="#CFE3FF"/>
+  <text x="860" y="289" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">Socket.io server</text>
+
+  <rect x="840" y="338" width="470" height="66" rx="12" fill="#FFFFFF" stroke="#CFE3FF"/>
+  <text x="860" y="373" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#113">In-memory matchmaking + rooms (games{})</text>
+
+  <!-- Backend vertical -->
+  <path d="M980,236 C980,246 980,248 980,254" fill="none" stroke="#1976D2" stroke-width="2.5" marker-end="url(#arrB)"/>
+  <path d="M980,320 C980,330 980,332 980,338" fill="none" stroke="#1976D2" stroke-width="2.5" marker-end="url(#arrB)"/>
+
+  <!-- Supabase cluster -->
+  <rect x="980" y="460" width="320" height="130" rx="18" fill="url(#dbGrad)" stroke="#FF9800" stroke-width="2"/>
+  <text x="1000" y="490" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#E65100">Supabase (Postgres)</text>
+  <text x="1000" y="510" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#6D4C41">Table: players (email, username, elo, wins, losses)</text>
+
+  <!-- Cross-boundary flows -->
+  <path d="M590,212 C760,212 840,280 840,280" fill="none" stroke="#616161" stroke-width="2.5" marker-end="url(#arrB)"/>
+  <path d="M840,280 C720,280 580,212 580,212" fill="none" stroke="#616161" stroke-width="2.5" marker-end="url(#arrB)"/>
+  <text x="650" y="194" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#455A64">find_game, move, leaveGame</text>
+  <text x="720" y="296" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#455A64">update_players, start_game, move, userLeft</text>
+
+  <path d="M660,286 C800,360 980,500 980,500" fill="none" stroke="#E65100" stroke-width="2.5" marker-end="url(#arrO)"/>
+  <path d="M980,540 C830,410 700,326 700,326" fill="none" stroke="#E65100" stroke-width="2.5" marker-end="url(#arrO)"/>
+  <text x="760" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#6D4C41">read/write: players</text>
+
+  <!-- Tags -->
+  <rect x="60" y="416" rx="9" ry="9" width="160" height="28" fill="#E8F5E9" stroke="#66BB6A"/>
+  <text x="75" y="435" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#1B5E20">Client-side rules</text>
+
+  <rect x="230" y="416" rx="9" ry="9" width="200" height="28" fill="#E8F5E9" stroke="#66BB6A"/>
+  <text x="245" y="435" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#1B5E20">Drag &amp; drop board DOM</text>
+
+  <rect x="450" y="416" rx="9" ry="9" width="210" height="28" fill="#E3F2FD" stroke="#64B5F6"/>
+  <text x="465" y="435" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#0D47A1">Matchmaking relay only</text>
+
+  <rect x="680" y="416" rx="9" ry="9" width="170" height="28" fill="#FFF3E0" stroke="#FFB74D"/>
+  <text x="695" y="435" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#E65100">Player stats (ELO)</text>
+
+  <!-- Footer note -->
+  <text x="40" y="860" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#455A64">Notes: Game state is not persisted on the server; backend relays moves. Client enforces move legality.</text>
+</svg>
+
