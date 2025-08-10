@@ -8,14 +8,19 @@ const ChessValidator = require('./chess-validator');
 const app = express();
 app.use(cors());  // Enable CORS for your frontend
 
+// Simple health endpoint to verify server is reachable
+app.get('/health', (req, res) => {
+  res.json({ ok: true, time: Date.now() });
+});
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",  // Your React frontend URL
-    methods: ["GET", "POST"]
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST"],
   },
-  pingTimeout: 60000,  // 60 seconds
-  pingInterval: 25000  // 25 seconds
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 // Game management
