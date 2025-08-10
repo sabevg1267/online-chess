@@ -5,7 +5,12 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {GoogleOAuthProvider} from "@react-oauth/google"
 
-const CLIENT_ID = "787401426717-e4d48algs3th36v1ncpnee8pqq3boq0t.apps.googleusercontent.com"
+// Get Google Client ID from environment variable
+const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "787401426717-e4d48algs3th36v1ncpnee8pqq3boq0t.apps.googleusercontent.com";
+
+if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+    console.warn('REACT_APP_GOOGLE_CLIENT_ID not found in environment variables. Using default value.');
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

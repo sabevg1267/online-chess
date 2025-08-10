@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { GoogleLogin, googleLogout } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
@@ -19,21 +19,15 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
     const [ingame, _setIngame] = useState(false);
     const [oppUsername, setOppUsername] = useState("")
     const [oppElo, setOppElo] = useState(0)
+    
+    // State for button UI instead of DOM manipulation
+    const [playButtonText, setPlayButtonText] = useState("Play Random");
+    const [playButtonColor, setPlayButtonColor] = useState("rgb(122, 230, 123)");
+    const [drawButtonText, setDrawButtonText] = useState("Request Draw?");
+    const [drawButtonColor, setDrawButtonColor] = useState("Orange");
 
-    useEffect(() => {
-        const storedEmail = localStorage.getItem("email");
-        const storedName = localStorage.getItem("name");
-        if (storedEmail && storedName) {
-            setEmail(storedEmail);
-            setUsername(storedName);
-            getUserStats(storedEmail)
-            setSignedIn(true);
-        }
-    }, []);
-
-
-
-    const getUserStats = async (email) => {
+    // Memoize these functions to prevent recreating them on every render
+    const getUserStats = useCallback(async (email) => {
         const {data, error} = await supabase
             .from('players')
             .select('*')
@@ -41,7 +35,7 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
 
         if (error){
             console.log(error)
-        }else if (data.length > 0) {
+        }else if (data && data.length > 0) {
             const user = data[0];
             setUserWins(user.wins);
             setUserLosses(user.losses);
@@ -51,21 +45,21 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
             localStorage.setItem('losses', user.losses);
             localStorage.setItem('elo', user.elo);
         }
-    }
+    }, []);
 
-    const getOppElo = async (email) => {
+    const getOppElo = useCallback(async (email) => {
         const {data, error} = await supabase 
             .from('players')
             .select('*')
             .eq('email', email)
         if (error){
             console.log(error)
-        }else{
+        }else if (data && data.length > 0){
             setOppElo(data[0].elo)
         }
-    }
+    }, []);
 
-    const checkUserInSupabase = async (email, username) => {
+    const checkUserInSupabase = useCallback(async (email, username) => {
         const { data, error } = await supabase
             .from('players')
             .select('*')
@@ -73,7 +67,7 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
 
         if (error) {
             console.error(error);
-        } else if (data.length > 0) {
+        } else if (data && data.length > 0) {
             setUserElo(data[0].elo)
             setUserWins(data[0].wins)
             setUserLosses(data[0].losses)
@@ -81,9 +75,9 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
             console.log("New user, insert them");
             addUserInSupabase(email, username)
         }
-    };
+    }, []);
 
-    const addUserInSupabase = async(email, username) =>{
+    const addUserInSupabase = useCallback(async(email, username) =>{
         const {data, error} = await supabase
             .from('players')
             .insert({email,username})
@@ -92,9 +86,9 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
         }else{
             console.log(data)
         }
-    }
+    }, []);
 
-    const updateUserElo = async(email, newUserElo) =>{
+    const updateUserElo = useCallback(async(email, newUserElo) =>{
         const {data, error} = await supabase
             .from("players")
             .update({elo : newUserElo})
@@ -107,9 +101,9 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
         } else {
             console.log("ELO updated successfully:", data);
         }
-    }  
+    }, []);
 
-    const updateUserWins = async(email, newUserWins) => {
+    const updateUserWins = useCallback(async(email, newUserWins) => {
         const {data,error} = await supabase
             .from('players')
             .update({wins: newUserWins})
@@ -121,9 +115,9 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
         } else {
             console.log("Wins updated successfully:", data);
         }
-    }
+    }, []);
 
-    const updateUserLosses = async(email, newUserLosses) => {
+    const updateUserLosses = useCallback(async(email, newUserLosses) => {
         const {data,error} = await supabase
             .from('players')
             .update({losses: newUserLosses})
@@ -135,7 +129,73 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
         } else {
             console.log("Losses updated successfully:", data);
         }
-    }
+    }, []);
+
+    // Initial load effect
+    useEffect(() => {
+        const storedEmail = localStorage.getItem("email");
+        const storedName = localStorage.getItem("name");
+        if (storedEmail && storedName) {
+            setEmail(storedEmail);
+            setUsername(storedName);
+            getUserStats(storedEmail)
+            setSignedIn(true);
+        }
+    }, [getUserStats]);
+
+    // Socket event listeners with proper cleanup
+    useEffect(() => {
+        const handleStartGame = (data) => {
+            setPlayButtonText("Quit");
+            setPlayButtonColor("Red");
+            setDrawButtonText("Draw");
+            setDrawButtonColor("Orange");
+            
+            if (data.players[0] === socket.id) {
+                setPlayerColor("white")
+                setOppUsername(data.names[1])
+                getOppElo(data.emails[1])
+            } else {
+                // TODO: Move piece removal logic to Board component
+                const pieces = Array.from(document.getElementsByClassName("piece"));
+                for (const piece of pieces) {
+                    piece.remove();
+                }
+                setPlayerColor("black")
+                setTurn("white")
+                setOppUsername(data.names[0])
+                getOppElo(data.emails[0])
+            }
+            setInGame(true);
+            _setIngame(true);
+        };
+
+        const handleUserLeft = (data) => {
+            setInGame(false)
+            _setIngame(false)
+            alert(data.user+" has left the game! (+10)")
+            setPlayButtonText("Play Random");
+            setPlayButtonColor("rgb(122, 230, 123)");
+            
+            // Update stats
+            const newElo = userElo + 10;
+            const newWins = userWins + 1;
+            updateUserElo(email, newElo)
+            setUserElo(newElo)
+            updateUserWins(email, newWins)
+            setUserWins(newWins)
+        };
+
+        // Subscribe to events
+        socket.on("start_game", handleStartGame);
+        socket.on("userLeft", handleUserLeft);
+
+        // Cleanup function - remove listeners when component unmounts or dependencies change
+        return () => {
+            socket.off("start_game", handleStartGame);
+            socket.off("userLeft", handleUserLeft);
+        };
+    }, [setInGame, setPlayerColor, setTurn, getOppElo, email, userElo, userWins, updateUserElo, updateUserWins]);
 
     const handleLogout = () => {
         googleLogout();
@@ -146,83 +206,35 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
         setUsername("");
     };
 
-    const playRandom = (data) => {
+    const playRandom = () => {
         // Player Requests to Join a Room
         const storedEmail = localStorage.getItem("email");
         const storedName = localStorage.getItem("name");
         socket.emit("find_game", {email: storedEmail, name: storedName})
-        const randomButton = document.getElementById("playRandom")
-        randomButton.textContent = "Searching"
-        randomButton.style.backgroundColor = "yellow"
+        setPlayButtonText("Searching");
+        setPlayButtonColor("yellow");
     }
 
     const playFriend = () =>{
         setSearching(true)
     }
 
-    socket.on("start_game", (data) => {
-        setTimeout(() => {
-            const randomButton = document.getElementById("playRandom");
-            if (randomButton) {
-                randomButton.textContent = "Quit";
-                randomButton.style.backgroundColor = "Red";
-            }
-
-            const drawButton = document.getElementById("drawButton");
-            if (drawButton) {
-                drawButton.textContent = "Draw";
-                drawButton.style.backgroundColor = "Orange";
-            }
-        }, 100); // 100ms delay to wait for DOM
-        if (data.players[0] === socket.id) {
-            setPlayerColor("white")
-            setOppUsername(data.names[1])
-            getOppElo(data.emails[1])
-        } else {
-            const pieces = Array.from(document.getElementsByClassName("piece"));
-            for (const piece of pieces) {
-                piece.remove();
-            }
-            setPlayerColor("black")
-            setTurn("white")
-            setOppUsername(data.names[0])
-            getOppElo(data.emails[0])
-        }
-        setInGame(true); // Lifts it up to App and Board
-        _setIngame(true); // Just for Bar’s conditional rendering
-    });
-
     const leaveGame = () =>{
         socket.emit("leaveGame", {user: username, email: email})
         setInGame(false)
         _setIngame(false)
         alert("You have left the game! (-10)")
-        setTimeout(() =>{
-            const randomButton = document.getElementById("playRandom")
-            randomButton.textContent = "Play Random"
-            randomButton.style.backgroundColor = "rgb(122, 230, 123)"
-        }, 100)
-        updateUserElo(email, userElo - 10)
-        setUserElo(userElo-10)
-        updateUserLosses(email, userLosses + 1)
-        setUserLosses(userLosses + 1)
+        setPlayButtonText("Play Random");
+        setPlayButtonColor("rgb(122, 230, 123)");
+        
+        // Update stats
+        const newElo = userElo - 10;
+        const newLosses = userLosses + 1;
+        updateUserElo(email, newElo)
+        setUserElo(newElo)
+        updateUserLosses(email, newLosses)
+        setUserLosses(newLosses)
     }
-
-    socket.on("userLeft", (data) =>{
-        setInGame(false)
-        _setIngame(false)
-        alert(data.user+" has left the game! (+10)")
-        setTimeout(() =>{
-            const randomButton = document.getElementById("playRandom")
-            randomButton.textContent = "Play Random"
-            randomButton.style.backgroundColor = "rgb(122, 230, 123)"
-        }, 100)
-        updateUserElo(email, userElo + 10)
-        setUserElo(userElo + 10)
-        updateUserWins(email, userWins + 1)
-        setUserWins(userWins+1)
-    })
-
 
     if (signedIn) {
         if (ingame){
@@ -232,7 +244,13 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
                     <h3>{oppElo}</h3>
                     <hr width= "200"/>
                     <button onMouseDown={leaveGame}>Quit</button>
-                    <button id = "drawButton" className='drawButton'>Request Draw?</button>
+                    <button 
+                        id="drawButton" 
+                        className='drawButton'
+                        style={{ backgroundColor: drawButtonColor }}
+                    >
+                        {drawButtonText}
+                    </button>
                     <hr width= "200"/>
                     <h2 style={{ color: "yellow" }}>{username}</h2>
                     <h3 style={{ color: "yellow" }}>{userElo}</h3>
@@ -257,8 +275,15 @@ export function Bar({setInGame, setPlayerColor, setTurn}) {
                         <h1 className='welcome'>Welcome, {username}!</h1>
                         <h3 className='displayElo'>{userElo}</h3>
                         <h3 className='displayWs'>Wins: {userWins} | Losses: {userLosses}</h3>
-                        <button className='playRandom' id = "playRandom" onMouseDown={playRandom}>Play Random</button>
-                        <button className='playFriend' id = "playFriend" onMouseDown={() => setSearching(true)}>Play Friend</button>
+                        <button 
+                            className='playRandom' 
+                            id="playRandom" 
+                            style={{ backgroundColor: playButtonColor }}
+                            onMouseDown={playRandom}
+                        >
+                            {playButtonText}
+                        </button>
+                        <button className='playFriend' id="playFriend" onMouseDown={() => setSearching(true)}>Play Friend</button>
                         <button onClick={handleLogout} className='logoutButton'>Logout</button>
                     </div>
                 );

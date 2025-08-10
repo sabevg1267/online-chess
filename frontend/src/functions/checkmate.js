@@ -1,5 +1,5 @@
-import { whitechessArray } from "../constants/chessConstants";
 import { getLegalMoves } from "./legalMoves";
+import { getRidOfCheck } from "./getRidOfCheck";
 
 
 export function checkmate(color){
@@ -7,7 +7,6 @@ export function checkmate(color){
     // Is White Player Checkmating??
     if (color === "white"){
 
-        const blackKing = document.getElementById("k-b")
         for (const piece of pieces){
             if (piece.id[2] === "b"){
                 let modI = (7-parseInt(piece.parentElement.id[0])).toString()
@@ -16,22 +15,25 @@ export function checkmate(color){
                 console.log(piece, lms)
 
                 for (const m of lms){
+                    const from = piece.parentElement
                     const to = getSquare(m)
-                    console.log(getRidOfCheck(piece, piece.id, from, to))
+                    if (to) {
+                        console.log(getRidOfCheck(piece, piece.id, from, to))
+                    }
                 }
             }
         }
 
     }else{
         //Is Black Player Checkmating
-        const whiteKing = document.getElementById("k-w")
+        // TODO: implement black checkmating logic when needed
     }
 }
 
 function getSquare(notation){
     const squares = document.getElementsByClassName("square")
     for (const square of squares){
-        if (square.getAttribute("data-notation")){
+        if (square.getAttribute("data-notation") === notation){
             return square
         }
     }
