@@ -69,10 +69,21 @@ function findPlayerRoom(socketId) {
 }
 
 io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log(`[conn] User connected: ${socket.id}`);
+
+  // Log all incoming events for this socket (first arg previewed)
+  socket.onAny((event, ...args) => {
+    try {
+      const preview = args && args.length > 0 ? JSON.stringify(args[0]).slice(0, 200) : '';
+      console.log(`[event] ${socket.id} -> ${event} ${preview}`);
+    } catch (_) {
+      console.log(`[event] ${socket.id} -> ${event}`);
+    }
+  });
 
   socket.on("find_game", (data) => {
     try {
+      console.log(`[find_game] from ${socket.id} data=${JSON.stringify(data)}`);
       // Sanitize and validate inputs
       const theEmail = sanitizeInput(data.email, 254); // Max email length
       const theName = sanitizeInput(data.name, 50);
@@ -110,8 +121,10 @@ io.on('connection', (socket) => {
           emails: [],
           status: 'waiting',
           validator: new ChessValidator(),
-          turn: 'white'
+          turn: 'white',
+          createdAt: Date.now()
         };
+        console.log(`[room] created ${joinedRoom}`);
       }
 
       // Join the room
@@ -124,18 +137,19 @@ io.on('connection', (socket) => {
       games[joinedRoom].players.push(socket.id);
       games[joinedRoom].names.push(theName);
       games[joinedRoom].emails.push(theEmail);
-      console.log("User " + theName + " joined " + joinedRoom);
+      console.log(`[room] ${theName}(${socket.id}) joined ${joinedRoom} players=${games[joinedRoom].players.length}`);
 
       // Notify people in room 
       io.to(joinedRoom).emit("update_players", {
         players: games[joinedRoom].players,
         names: games[joinedRoom].names
       });
+      console.log(`[emit] update_players -> ${joinedRoom}`);
 
       // Start game if 2 players are present
       if (games[joinedRoom].players.length === 2) {
         games[joinedRoom].status = 'active';
-        console.log("Game Starting in " + joinedRoom);
+        console.log(`[emit] start_game -> ${joinedRoom}`);
         io.to(joinedRoom).emit('start_game', {
           players: games[joinedRoom].players,
           names: games[joinedRoom].names,
@@ -184,7 +198,7 @@ io.on('connection', (socket) => {
       delete socket.data.email;
       delete socket.data.name;
 
-      console.log(socket.id + " has left game " + roomName);
+      console.log(`[leave] ${socket.id} has left game ${roomName}`);
     } catch (error) {
       console.error('Error in leaveGame:', error);
     }
@@ -203,6 +217,7 @@ io.on('connection', (socket) => {
       // Check if it's the player's turn
       const playerIndex = game.players.indexOf(socket.id);
       const playerColor = playerIndex === 0 ? 'white' : 'black';
+      console.log(`[move] ${socket.id} (${playerColor}) -> ${JSON.stringify(data)}`);
       
       if (game.validator.currentTurn !== playerColor) {
         socket.emit('error', { message: 'Not your turn' });
@@ -217,6 +232,7 @@ io.on('connection', (socket) => {
           reason: moveResult.reason,
           notation: data.notation 
         });
+        console.log(`[invalid_move] ${socket.id} reason=${moveResult.reason}`);
         return;
       }
 
@@ -230,7 +246,7 @@ io.on('connection', (socket) => {
         gameState: game.validator.getGameState()
       });
 
-      console.log(`Valid move from ${socket.id} in ${roomName}: ${data.notation}`);
+      console.log(`[valid_move] ${socket.id} in ${roomName}: ${data.notation}`);
     } catch (error) {
       console.error('Error processing move:', error);
       socket.emit('error', { message: 'Failed to process move' });
@@ -239,7 +255,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     try {
-      console.log(`User disconnected: ${socket.id}`);
+      console.log(`[disc] User disconnected: ${socket.id}`);
       
       const roomName = socket.data.room;
       if (roomName && games[roomName]) {
@@ -326,7 +342,7 @@ io.on('connection', (socket) => {
                 gameState: games[roomId].validator.getGameState()
               });
 
-              console.log(`Player ${name} reconnected to ${roomId}`);
+              console.log(`[reconnect] Player ${name} reconnected to ${roomId}`);
               return;
             }
           }

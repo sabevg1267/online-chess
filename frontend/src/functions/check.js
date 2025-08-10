@@ -27,8 +27,8 @@ export function check(currPiece, id, from, to, turn){
                 let bpms = getLegalMoves(piece, piece.id, modI + modJ)
                 
                 if (bpms.includes(kingBlack.parentElement.getAttribute("data-notation"))){
-                    console.log(whitechessArray)
-                    checkmate("white")
+                    const isMate = checkmate("white")
+                    console.log("Checkmate:", isMate)
                     whitechessArray[parseInt(from.id[0])][parseInt(from.id[1])] = id[0]
                     whitechessArray[parseInt(to.id[0])][parseInt(to.id[1])] = "0"
                     to.removeChild(to.firstChild)
@@ -76,6 +76,8 @@ export function check(currPiece, id, from, to, turn){
                 // Black Piece Possible Moves
                 let bpms = getLegalMoves(piece, piece.id, modI + modJ)
                 if (bpms.includes(kingWhite.parentElement.getAttribute("data-notation"))){
+                    const isMate = checkmate("black")
+                    console.log("Checkmate:", isMate)
                     whitechessArray[7-parseInt(from.id[0])][7-parseInt(from.id[1])] = id[0]
                     whitechessArray[7-parseInt(to.id[0])][7-parseInt(to.id[1])] = "0"
                     to.removeChild(to.firstChild)
@@ -87,7 +89,6 @@ export function check(currPiece, id, from, to, turn){
                         tempPiece.style.position = "static";
                     }
                     from.appendChild(currPiece)
-                    console.log("Black White in Check")
                     return true
                 }
             }
